@@ -18,3 +18,4 @@ class LetterUnitFactory extends Factory
         ];
     }
 }
+

@@ -47,3 +47,4 @@ class LetterNumberBlock extends Model
         return $this->end_number !== null && $this->next_number > $this->end_number;
     }
 }
+

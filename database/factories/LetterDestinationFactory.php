@@ -18,3 +18,4 @@ class LetterDestinationFactory extends Factory
         ];
     }
 }
+

@@ -24,3 +24,4 @@ class LetterNumberBlockFactory extends Factory
         ];
     }
 }
+

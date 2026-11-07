@@ -25,3 +25,4 @@ class LetterTypeFactory extends Factory
         ];
     }
 }
+
