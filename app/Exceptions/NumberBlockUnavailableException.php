@@ -11,3 +11,4 @@ class NumberBlockUnavailableException extends RuntimeException
         parent::__construct("Blok nomor tahun {$year} belum diatur atau sudah habis. Silakan hubungi administrator.");
     }
 }
+

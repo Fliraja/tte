@@ -357,3 +357,4 @@ class LetterNumberServiceTest extends TestCase
         ]);
     }
 }
+
