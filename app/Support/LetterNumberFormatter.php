@@ -54,3 +54,4 @@ class LetterNumberFormatter
         return "{$typeCode}.{$seqFormatted}/{$destCode}/RSUN/{$romanMonth}/{$year}";
     }
 }
+

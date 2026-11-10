@@ -101,3 +101,4 @@ class LetterNumberFormatterTest extends TestCase
         LetterNumberFormatter::format($type, 1, null, null);
     }
 }
+
