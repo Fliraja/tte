@@ -6,6 +6,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\NumberBlockController;
 use App\Http\Controllers\QrGenerationController;
 use App\Http\Controllers\SignerController;
+use App\Http\Controllers\TanpaNomorController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->group(function () {
     Route::get('/', [QrGenerationController::class, 'create'])->name('qr.create');
     Route::post('/qr/generate', [QrGenerationController::class, 'store'])->name('qr.generate');
+    Route::get('/qr/history', [QrGenerationController::class, 'history'])->name('qr.history');
+    Route::get('/qr/{uuid}', [QrGenerationController::class, 'show'])->name('qr.show');
+    Route::get('/qr/{uuid}/png', [QrGenerationController::class, 'png'])->name('qr.png');
+
+    Route::get('/tanpa-nomor', [TanpaNomorController::class, 'create'])->name('tanpa-nomor.create');
+    Route::post('/tanpa-nomor', [TanpaNomorController::class, 'store'])->name('tanpa-nomor.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
