@@ -33,3 +33,4 @@ class QrGenerationPolicy
         return $generation->generated_by === $user->id && $generation->isIssued();
     }
 }
+

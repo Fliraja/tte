@@ -163,3 +163,4 @@ class VoidLetterTest extends TestCase
         $this->assertTrue($gen->isVoid());
     }
 }
+
