@@ -19,6 +19,9 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('blocks.index')" :active="request()->routeIs('blocks.*')">
+                            {{ __('Blok Nomor') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('signers.index')" :active="request()->routeIs('signers.*')">
                             {{ __('Penandatangan') }}
                         </x-nav-link>
@@ -87,6 +90,9 @@
             @if (Auth::user()->role === 'admin')
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Admin') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('blocks.index')" :active="request()->routeIs('blocks.*')">
+                    {{ __('Blok Nomor') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('signers.index')" :active="request()->routeIs('signers.*')">
                     {{ __('Penandatangan') }}

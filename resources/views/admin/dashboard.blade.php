@@ -17,6 +17,95 @@
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
+            {{-- Warning Banner jika blok nomor belum ada atau habis --}}
+            @if (! $stats['has_any_block_this_year'])
+                <div class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-r-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <div class="font-semibold text-rose-900 text-sm">Peringatan: Blok nomor tahun {{ $stats['current_year'] }} belum diatur!</div>
+                            <div class="text-xs text-rose-700 mt-0.5">Surat dengan penomoran otomatis tidak dapat diterbitkan staf sampai blok nomor dibuat.</div>
+                        </div>
+                    </div>
+                    <a href="{{ route('blocks.create', ['year' => $stats['current_year']]) }}" class="shrink-0 px-3.5 py-1.5 bg-rose-600 text-white font-medium text-xs rounded-lg hover:bg-rose-700 transition">
+                        Atur Blok Nomor Sekarang →
+                    </a>
+                </div>
+            @elseif (! $stats['active_block'])
+                <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <div class="font-semibold text-amber-900 text-sm">Peringatan: Semua blok nomor tahun {{ $stats['current_year'] }} sudah habis!</div>
+                            <div class="text-xs text-amber-700 mt-0.5">Staf tidak dapat menerbitkan nomor surat baru sampai blok nomor berikutnya ditambahkan.</div>
+                        </div>
+                    </div>
+                    <a href="{{ route('blocks.create', ['year' => $stats['current_year']]) }}" class="shrink-0 px-3.5 py-1.5 bg-amber-600 text-white font-medium text-xs rounded-lg hover:bg-amber-700 transition">
+                        Tambah Blok Nomor Baru →
+                    </a>
+                </div>
+            @endif
+
+            {{-- Stat cards: Blok & Penomoran Surat --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-white rounded-xl border border-gray-200 p-5 flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="text-xs font-medium uppercase tracking-wider text-gray-500">Nomor Terakhir Terbit ({{ $stats['current_year'] }})</div>
+                        <div class="text-2xl font-bold font-mono text-gray-900 mt-1">
+                            @if ($stats['last_issued_seq'])
+                                #{{ $stats['last_issued_seq'] }}
+                            @else
+                                <span class="text-gray-400 font-sans text-lg font-normal">Belum ada</span>
+                            @endif
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1 font-mono truncate" title="{{ $stats['last_issued_number'] }}">
+                            {{ $stats['last_issued_number'] ?? 'Belum ada surat otomatis diterbitkan tahun ini' }}
+                        </div>
+                    </div>
+                    <div class="shrink-0 w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-gray-200 p-5 flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="text-xs font-medium uppercase tracking-wider text-gray-500">Sisa Blok Nomor Aktif</div>
+                        <div class="text-2xl font-bold text-gray-900 mt-1">
+                            @if (! $stats['active_block'])
+                                <span class="text-rose-600 text-lg font-semibold">Habis / Belum Ada</span>
+                            @elseif ($stats['active_block']->end_number === null)
+                                <span class="text-emerald-600 text-lg font-semibold">Tanpa Batas</span>
+                            @else
+                                <span class="{{ $stats['active_block']->remainingNumbers() <= 10 ? 'text-amber-600' : 'text-gray-900' }}">
+                                    {{ $stats['active_block']->remainingNumbers() }}
+                                </span>
+                                <span class="text-xs font-normal text-gray-500">nomor tersisa</span>
+                            @endif
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                            @if ($stats['active_block'])
+                                <span class="font-mono">Rentang {{ $stats['active_block']->start_number }}–{{ $stats['active_block']->end_number ?? '∞' }}</span>
+                                <span>•</span>
+                                <span class="font-mono text-emerald-600">Next: #{{ $stats['active_block']->next_number }}</span>
+                            @else
+                                <span>Hubungi TU untuk meminta blok deret nomor baru</span>
+                            @endif
+                        </div>
+                    </div>
+                    <a href="{{ route('blocks.index') }}" class="shrink-0 w-11 h-11 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 flex items-center justify-center transition" title="Kelola Blok Nomor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
             {{-- Stat cards --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\NumberBlockController;
 use App\Http\Controllers\QrGenerationController;
 use App\Http\Controllers\SignerController;
 use App\Http\Controllers\UserManagementController;
@@ -19,6 +20,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::resource('blocks', NumberBlockController::class)->only(['index', 'create', 'store']);
         Route::resource('users', UserManagementController::class)->except(['show']);
         Route::patch('/users/{user}/toggle', [UserManagementController::class, 'toggle'])->name('users.toggle');
         Route::resource('signers', SignerController::class)->except(['show']);
