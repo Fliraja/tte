@@ -190,3 +190,4 @@ class AdminNumberBlockTest extends TestCase
             ->assertSee('Rentang 100–150');
     }
 }
+

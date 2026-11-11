@@ -70,3 +70,4 @@ class NumberBlockController extends Controller
             ->with('success', "Blok nomor tahun {$validated['year']} berhasil ditambahkan.");
     }
 }
+
