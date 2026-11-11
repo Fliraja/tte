@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::get('/verify/{uuid}', [VerificationController::class, 'show'])->name('verify.show');
+Route::get('/verify/{uuid}', [VerificationController::class, 'show'])
+    ->middleware('throttle:60,1')
+    ->name('verify.show');
 
 require __DIR__.'/auth.php';
