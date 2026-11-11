@@ -86,3 +86,4 @@ class TanpaNomorController extends Controller
             ->with('success', 'QR TTE Tanpa Nomor berhasil diterbitkan.');
     }
 }
+
