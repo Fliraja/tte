@@ -8,10 +8,12 @@ use App\Models\LetterDestination;
 use App\Models\LetterType;
 use App\Models\LetterUnit;
 use App\Models\QrGeneration;
+use App\Models\QrGenerationEvent;
 use App\Models\Signer;
 use App\Services\LetterNumberService;
 use App\Services\QrCodeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
 class QrGenerationController extends Controller
@@ -102,14 +104,11 @@ class QrGenerationController extends Controller
 
     public function show(string $uuid)
     {
-        $generation = QrGeneration::with(['signer', 'letterType', 'destination', 'unit', 'generator'])
+        $generation = QrGeneration::with(['signer', 'letterType', 'destination', 'unit', 'generator', 'voider', 'events.user'])
             ->where('uuid', $uuid)
             ->firstOrFail();
 
-        // Otorisasi: hanya pembuat atau admin
-        if (auth()->user()->role !== 'admin' && $generation->generated_by !== auth()->id()) {
-            abort(403);
-        }
+        Gate::authorize('view', $generation);
 
         return view('qr.show', compact('generation'));
     }
@@ -118,9 +117,7 @@ class QrGenerationController extends Controller
     {
         $generation = QrGeneration::where('uuid', $uuid)->firstOrFail();
 
-        if (auth()->user()->role !== 'admin' && $generation->generated_by !== auth()->id()) {
-            abort(403);
-        }
+        Gate::authorize('view', $generation);
 
         $pngData = $this->qrCodeService->generate(url('/verify/' . $generation->uuid));
 
@@ -128,6 +125,40 @@ class QrGenerationController extends Controller
             'Content-Type' => 'image/png',
             'Content-Disposition' => 'inline; filename="qr-ttd-' . $generation->uuid . '.png"',
         ]);
+    }
+
+    public function void(Request $request, string $uuid)
+    {
+        $generation = QrGeneration::where('uuid', $uuid)->firstOrFail();
+
+        Gate::authorize('void', $generation);
+
+        $validated = $request->validate([
+            'void_reason' => ['required', 'string', 'min:5', 'max:500'],
+        ], [
+            'void_reason.required' => 'Alasan pembatalan surat wajib diisi.',
+            'void_reason.min' => 'Alasan pembatalan surat minimal 5 karakter.',
+        ]);
+
+        $reason = trim($validated['void_reason']);
+
+        $generation->update([
+            'status' => 'void',
+            'voided_at' => now(),
+            'voided_by' => $request->user()->id,
+            'void_reason' => $reason,
+        ]);
+
+        QrGenerationEvent::create([
+            'qr_generation_id' => $generation->id,
+            'user_id' => $request->user()->id,
+            'event' => 'voided',
+            'note' => $reason,
+            'created_at' => now(),
+        ]);
+
+        return redirect()->route('qr.show', $generation->uuid)
+            ->with('success', 'Surat berhasil dibatalkan (void). Nomor surat hangus dan tidak dapat digunakan kembali.');
     }
 
     public function history(Request $request)

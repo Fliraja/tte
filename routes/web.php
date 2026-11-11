@@ -17,6 +17,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/qr/history', [QrGenerationController::class, 'history'])->name('qr.history');
     Route::get('/qr/{uuid}', [QrGenerationController::class, 'show'])->name('qr.show');
     Route::get('/qr/{uuid}/png', [QrGenerationController::class, 'png'])->name('qr.png');
+    Route::post('/qr/{uuid}/void', [QrGenerationController::class, 'void'])->name('qr.void');
 
     Route::get('/tanpa-nomor', [TanpaNomorController::class, 'create'])->name('tanpa-nomor.create');
     Route::post('/tanpa-nomor', [TanpaNomorController::class, 'store'])->name('tanpa-nomor.store');
