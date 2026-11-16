@@ -51,6 +51,22 @@ class DocumentUploadTest extends TestCase
         return UploadedFile::fake()->createWithContent($name, $content);
     }
 
+    public function test_staff_can_see_upload_box_and_submit_button_on_issued_letter()
+    {
+        $generation = QrGeneration::factory()->create([
+            'generated_by' => $this->staff->id,
+            'signer_id' => $this->signer->id,
+            'status' => 'issued',
+        ]);
+
+        $response = $this->actingAs($this->staff)->get("/qr/{$generation->uuid}");
+
+        $response->assertOk();
+        $response->assertSee('Unggah Dokumen Final (PDF)');
+        $response->assertSee('Unggah Dokumen &amp; Kunci Final', false);
+        $response->assertSee('name="document"', false);
+    }
+
     public function test_staff_can_upload_valid_pdf_on_their_own_issued_letter()
     {
         $generation = QrGeneration::factory()->create([
