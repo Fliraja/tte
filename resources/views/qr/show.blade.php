@@ -257,15 +257,16 @@
                                             <input type="file" name="document" accept="application/pdf" required
                                                    class="block w-full text-xs text-gray-500 border border-indigo-200 rounded-lg bg-white p-1 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition cursor-pointer">
                                         </div>
-                                        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
-                                            <div class="text-[11px] text-gray-500">Format: <strong>PDF saja</strong> (maksimal 5 MB).</div>
+                                        <div class="flex items-center justify-between flex-wrap gap-3 pt-2">
+                                            <div class="text-xs text-gray-500">Format file: <strong>PDF saja</strong> (maksimal 5 MB).</div>
                                             <button type="submit"
+                                                    style="background-color: #4f46e5 !important; color: #ffffff !important; display: inline-flex !important; cursor: pointer !important;"
                                                     onclick="return confirm('Apakah Anda yakin ingin mengunggah berkas ini sebagai dokumen final? Status surat akan terkunci.')"
-                                                    class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-md hover:shadow-lg transition">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-md hover:shadow-lg transition">
+                                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                                 </svg>
-                                                Unggah Dokumen &amp; Kunci Final
+                                                <span>Unggah Dokumen &amp; Kunci Final</span>
                                             </button>
                                         </div>
                                     </form>
