@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\NumberBlockController;
+use App\Http\Controllers\QrDocumentController;
 use App\Http\Controllers\QrGenerationController;
 use App\Http\Controllers\SignerController;
 use App\Http\Controllers\TanpaNomorController;
@@ -18,6 +19,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/qr/{uuid}', [QrGenerationController::class, 'show'])->name('qr.show');
     Route::get('/qr/{uuid}/png', [QrGenerationController::class, 'png'])->name('qr.png');
     Route::post('/qr/{uuid}/void', [QrGenerationController::class, 'void'])->name('qr.void');
+
+    // Dokumen Final
+    Route::post('/qr/{uuid}/document', [QrDocumentController::class, 'upload'])->name('qr.document.upload');
+    Route::post('/qr/{uuid}/document/replace', [QrDocumentController::class, 'replace'])->name('qr.document.replace');
+    Route::get('/qr/{uuid}/document', [QrDocumentController::class, 'show'])->name('qr.document.show');
 
     Route::get('/tanpa-nomor', [TanpaNomorController::class, 'create'])->name('tanpa-nomor.create');
     Route::post('/tanpa-nomor', [TanpaNomorController::class, 'store'])->name('tanpa-nomor.store');
@@ -40,5 +46,9 @@ Route::middleware('auth')->group(function () {
 Route::get('/verify/{uuid}', [VerificationController::class, 'show'])
     ->middleware('throttle:60,1')
     ->name('verify.show');
+
+Route::get('/verify/{uuid}/document', [QrDocumentController::class, 'publicStream'])
+    ->middleware('throttle:60,1')
+    ->name('verify.document');
 
 require __DIR__.'/auth.php';

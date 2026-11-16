@@ -57,7 +57,7 @@
             @endif
 
             {{-- Card Utama: Nomor & QR --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 p-6 sm:p-8" x-data="{ openVoid: false }">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-200 p-6 sm:p-8" x-data="{ openVoid: false, openReplace: false }">
 
                 @if ($generation->letter_number)
                     <div class="text-center pb-6 border-b border-gray-100">
@@ -164,8 +164,111 @@
                             <div class="font-semibold text-amber-950">Langkah Selanjutnya:</div>
                             <p>1. Ketik nomor surat di atas pada berkas fisik / file dokumen Word Anda.</p>
                             <p>2. Unduh dan tempelkan gambar QR di kolom tanda tangan surat.</p>
-                            <p>3. Setelah dokumen ditandatangani dan diekspor ke PDF, dokumen final dapat diunggah ke sistem untuk penguncian arsip.</p>
+                            <p>3. Setelah dokumen ditandatangani dan diekspor ke PDF, unggah dokumen final di bawah ini untuk penguncian arsip resmi.</p>
                         </div>
+                    </div>
+                @endif
+
+                {{-- Bagian Dokumen Final (PDF) --}}
+                @if (! $generation->isVoid() && config('tte.documents_enabled'))
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                        @if ($generation->status === 'final')
+                            {{-- Dokumen Final Terkunci --}}
+                            <div class="p-5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-3">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-900">Naskah Dokumen Final Terkunci (Final)</span>
+                                    </div>
+                                    <span class="text-[11px] text-emerald-700">
+                                        Diunggah: {{ $generation->document_uploaded_at?->setTimezone(config('app.timezone', 'Asia/Makassar'))->translatedFormat('d F Y, H:i') }} WITA
+                                    </span>
+                                </div>
+
+                                <div class="text-xs text-emerald-800 space-y-1">
+                                    <p>Dokumen fisik telah diunggah dan diverifikasi hash SHA-256. Surat ini telah dikunci untuk arsip resmi.</p>
+                                    <div class="pt-1 flex items-center gap-2 flex-wrap text-[11px]">
+                                        <span class="font-medium text-emerald-950">Sidik Jari SHA-256:</span>
+                                        <code class="bg-white/80 px-2 py-0.5 rounded border border-emerald-300 font-mono text-emerald-900 break-all">{{ $generation->document_hash }}</code>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2 flex items-center justify-between flex-wrap gap-2">
+                                    <a href="{{ route('qr.document.show', $generation->uuid) }}" target="_blank"
+                                       class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Buka Naskah Dokumen (PDF) ↗
+                                    </a>
+
+                                    @can('replaceDocument', $generation)
+                                        <button @click="openReplace = !openReplace" type="button" class="text-xs font-medium text-amber-700 hover:text-amber-800 underline">
+                                            Ganti Dokumen (Khusus Admin)
+                                        </button>
+                                    @endcan
+                                </div>
+
+                                @can('replaceDocument', $generation)
+                                    <div x-show="openReplace" x-cloak class="mt-3 p-4 bg-white border border-amber-300 rounded-lg space-y-3">
+                                        <div class="text-xs font-semibold text-amber-900">Perbarui Dokumen Final (Override Admin):</div>
+                                        <form method="POST" action="{{ route('qr.document.replace', $generation->uuid) }}" enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="space-y-3">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700">Pilih Berkas PDF Baru (Maks 5 MB):</label>
+                                                    <input type="file" name="document" accept="application/pdf" required class="mt-1 block w-full text-xs text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-700">Alasan Penggantian Dokumen <span class="text-rose-500">*</span>:</label>
+                                                    <input type="text" name="reason" required minlength="5" placeholder="Contoh: Koreksi cap stempel pada halaman lampiran..." class="mt-1 block w-full rounded-md border-gray-300 text-xs shadow-sm focus:border-amber-500 focus:ring-amber-500">
+                                                </div>
+                                                <div class="flex items-center justify-end gap-2">
+                                                    <button @click="openReplace = false" type="button" class="px-3 py-1 text-xs text-gray-600 hover:text-gray-900">Batal</button>
+                                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin mengganti berkas dokumen final ini? Tindakan ini akan dicatat di riwayat event.')" class="px-3.5 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-md hover:bg-amber-700 shadow-sm">Simpan Dokumen Pengganti</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @endcan
+                            </div>
+                        @else
+                            {{-- Dokumen Belum Diunggah (Status: Issued) --}}
+                            @can('uploadDocument', $generation)
+                                <div class="p-5 bg-indigo-50/70 border-2 border-dashed border-indigo-300 rounded-xl space-y-3">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                        </svg>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-indigo-950">Unggah Dokumen Final (PDF)</span>
+                                    </div>
+                                    <p class="text-xs text-indigo-800">
+                                        Setelah surat fisik ditandatangani dan diekspor ke format PDF, unggah berkasnya di sini.
+                                        Status surat akan berubah menjadi <strong>Final</strong> dan terkunci otomatis.
+                                    </p>
+
+                                    <form method="POST" action="{{ route('qr.document.upload', $generation->uuid) }}" enctype="multipart/form-data" class="pt-2">
+                                        @csrf
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                                            <input type="file" name="document" accept="application/pdf" required
+                                                   class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 transition cursor-pointer">
+                                            <button type="submit"
+                                                    onclick="return confirm('Apakah Anda yakin ingin mengunggah berkas ini sebagai dokumen final? Status surat akan terkunci.')"
+                                                    class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                                </svg>
+                                                Unggah &amp; Kunci Final
+                                            </button>
+                                        </div>
+                                        <div class="text-[11px] text-gray-500 mt-1.5">Format file: <strong>PDF saja</strong> (maksimal 5 MB). Pastikan nomor dan QR sudah tertera pada dokumen.</div>
+                                    </form>
+                                </div>
+                            @endcan
+                        @endif
                     </div>
                 @endif
 

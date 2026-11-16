@@ -32,5 +32,39 @@ class QrGenerationPolicy
 
         return $generation->generated_by === $user->id && $generation->isIssued();
     }
+
+    /**
+     * Determine whether the user can upload a final document.
+     * Creator or admin can upload while status is 'issued' and not void.
+     */
+    public function uploadDocument(User $user, QrGeneration $generation): bool
+    {
+        if ($generation->isVoid() || $generation->status === 'final') {
+            return false;
+        }
+
+        return $user->role === 'admin' || $generation->generated_by === $user->id;
+    }
+
+    /**
+     * Determine whether the user can replace an existing final document.
+     * Admin only, when status is 'final' and not void.
+     */
+    public function replaceDocument(User $user, QrGeneration $generation): bool
+    {
+        if ($generation->isVoid() || $generation->status !== 'final') {
+            return false;
+        }
+
+        return $user->role === 'admin';
+    }
+
+    /**
+     * Determine whether the user can view/stream the stored private document.
+     */
+    public function viewDocument(User $user, QrGeneration $generation): bool
+    {
+        return $this->view($user, $generation);
+    }
 }
 
