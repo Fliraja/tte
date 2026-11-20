@@ -35,5 +35,6 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="TTE_AUTO_NUMBERING" value="false"/>
         <env name="TTE_DOCUMENTS_ENABLED" value="false"/>
+        <env name="TTE_QR_LINK_ENABLED" value="false"/>
     </php>
 </phpunit>

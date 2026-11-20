@@ -62,5 +62,47 @@ return [
 
     'document_disk' => env('TTE_DOCUMENT_DISK', 'local'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | QR Link Feature Flag
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, staff can turn an external link (e.g. Google Drive) into a
+    | QR code with the hospital logo. Scanning the QR redirects to the target.
+    | WARNING: once QR codes are printed, do not switch this off again because
+    | the public redirect route (/l/{code}) is disabled together with the menu.
+    |
+    */
+
+    'qr_link_enabled' => (bool) env('TTE_QR_LINK_ENABLED', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | QR Link Allowed Target Hosts
+    |--------------------------------------------------------------------------
+    |
+    | Comma separated list of hosts that may be used as QR Link targets.
+    | Exact host match only (subdomains are NOT allowed implicitly) and only
+    | the https scheme is accepted. Prevents the redirect from being abused.
+    |
+    */
+
+    'qr_link_allowed_hosts' => array_values(array_filter(array_map(
+        fn (string $host) => strtolower(trim($host)),
+        explode(',', (string) env('TTE_QR_LINK_ALLOWED_HOSTS', 'drive.google.com,docs.google.com'))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
+    | QR Link Code Length
+    |--------------------------------------------------------------------------
+    |
+    | Length of the random short code in /l/{code}. Do not change after QR
+    | codes have been printed; the public route pattern assumes this length.
+    |
+    */
+
+    'qr_link_code_length' => 10,
+
 ];
 
