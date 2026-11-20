@@ -81,15 +81,18 @@ return [
     | QR Link Allowed Target Hosts
     |--------------------------------------------------------------------------
     |
-    | Comma separated list of hosts that may be used as QR Link targets.
-    | Exact host match only (subdomains are NOT allowed implicitly) and only
-    | the https scheme is accepted. Prevents the redirect from being abused.
+    | Optional comma separated list of hosts that may be used as QR Link targets.
+    | LEAVE EMPTY (default) to allow any public https site. When filled, only the
+    | listed hosts are accepted.
+    | With a list: exact host match only (subdomains are NOT allowed implicitly).
+    | In both modes only the https scheme is accepted, and IP addresses and
+    | local names (localhost, intranet) are rejected.
     |
     */
 
     'qr_link_allowed_hosts' => array_values(array_filter(array_map(
         fn (string $host) => strtolower(trim($host)),
-        explode(',', (string) env('TTE_QR_LINK_ALLOWED_HOSTS', 'drive.google.com,docs.google.com'))
+        explode(',', (string) env('TTE_QR_LINK_ALLOWED_HOSTS', ''))
     ))),
 
     /*

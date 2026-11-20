@@ -86,11 +86,60 @@ class QrLinkUrlGuardTest extends TestCase
         $this->assertFalse($this->guard->isAllowed('https://docs.google.com/document/d/abc'));
     }
 
-    public function test_empty_whitelist_rejects_everything(): void
+    public function test_empty_whitelist_allows_any_public_https_host(): void
     {
         config(['tte.qr_link_allowed_hosts' => []]);
 
-        $this->assertFalse($this->guard->isAllowed('https://drive.google.com/file/d/abc'));
+        foreach ([
+            'https://drive.google.com/file/d/abc',
+            'https://example.org/page',
+            'https://sub.example.co.id/a/b?c=1#d',
+            'https://forms.gle/AbC123',
+            'https://www.canva.com/design/x/view',
+            'https://xn--bcher-kva.example/x',
+            'https://EXAMPLE.org/Case',
+        ] as $url) {
+            $this->assertTrue($this->guard->isAllowed($url), $url);
+            $this->assertNull($this->guard->reason($url), $url);
+        }
+    }
+
+    public function test_any_host_mode_still_rejects_ip_local_names_and_unsafe_urls(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+
+        foreach ([
+            'http://example.org/x',
+            'ftp://example.org/x',
+            'javascript:alert(1)',
+            'https://localhost/x',
+            'https://intranet/x',
+            'https://127.0.0.1/x',
+            'https://192.168.1.10/x',
+            'https://10.0.0.5/x',
+            'https://[::1]/x',
+            'https://2130706433/x',
+            'https://example.123/x',
+            'https://-bad.example/x',
+            'https://bad-.example/x',
+            'https://exa_mple.org/x',
+            'https://example.org:8443/x',
+            'https://user:pass@example.org/x',
+            'https://example.org/a b',
+            'https://example.org\\@evil.com/x',
+        ] as $url) {
+            $this->assertFalse($this->guard->isAllowed($url), $url);
+        }
+    }
+
+    public function test_any_host_mode_reports_ip_and_local_reason_in_indonesian(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+
+        $this->assertSame(
+            'Tautan harus memakai nama domain situs, bukan alamat IP atau nama lokal.',
+            $this->guard->reason('https://127.0.0.1/x')
+        );
     }
 
     public function test_normalize_only_trims(): void

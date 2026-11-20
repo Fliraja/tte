@@ -19,7 +19,7 @@
                 <div class="p-6 text-gray-900 space-y-5">
 
                     <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-xs text-indigo-900">
-                        Perubahan tujuan berlaku seketika pada QR yang sudah dicetak atau dibagikan. Pastikan tautan baru sudah dibagikan sebagai "Siapa saja yang memiliki link".
+                        Perubahan tujuan berlaku seketika pada QR yang sudah dicetak atau dibagikan. Pastikan tautan baru bisa dibuka siapa saja (untuk Drive: "Siapa saja yang memiliki link").
                     </div>
 
                     @if ($errors->any())
@@ -40,9 +40,15 @@
                         <div>
                             <x-input-label for="target_url" :value="__('Tautan Tujuan')" />
                             <x-text-input id="target_url" name="target_url" type="text" inputmode="url" autocomplete="off"
-                                class="mt-1 block w-full text-sm font-mono" :value="old('target_url', $link->target_url)" required autofocus />
+                                class="mt-1 block w-full text-sm font-mono" :value="old('target_url', $link->target_url)"
+                                placeholder="https://contoh-situs.com/berkas-atau-halaman..." required autofocus />
                             <p class="mt-1 text-xs text-gray-500">
-                                Wajib diawali https://. Domain yang diizinkan: {{ implode(', ', $allowedHosts) }}.
+                                Wajib diawali https://.
+                                @if (count($allowedHosts))
+                                    Domain yang diizinkan: {{ implode(', ', $allowedHosts) }}.
+                                @else
+                                    Situs apa pun dengan alamat https:// boleh dipakai.
+                                @endif
                             </p>
                             <x-input-error class="mt-2" :messages="$errors->get('target_url')" />
                         </div>

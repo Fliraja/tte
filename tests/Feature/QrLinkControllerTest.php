@@ -403,6 +403,43 @@ class QrLinkControllerTest extends TestCase
             ->assertDontSee(route('qr-link.index'), false);
     }
 
+    // ------------------------------------------------------- mode bebas (tanpa whitelist)
+
+    public function test_staff_can_create_link_to_any_public_https_site_when_whitelist_is_empty(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+
+        $this->actingAs($this->staff1)->post(route('qr-link.store'), [
+            'target_url' => 'https://example.org/menu-kantin?hari=senin',
+            'label' => 'Menu kantin',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame('https://example.org/menu-kantin?hari=senin', QrLink::firstOrFail()->target_url);
+    }
+
+    public function test_ip_address_target_is_rejected_when_whitelist_is_empty(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+
+        $this->actingAs($this->staff1)->post(route('qr-link.store'), [
+            'target_url' => 'https://192.168.1.10/rahasia',
+            'label' => 'IP lokal',
+        ])->assertSessionHasErrors('target_url');
+
+        $this->assertSame(0, QrLink::count());
+    }
+
+    public function test_forms_tell_that_any_https_site_is_allowed_when_whitelist_is_empty(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+        $link = $this->linkOf($this->staff1);
+
+        $this->actingAs($this->staff1);
+
+        $this->get(route('qr-link.create'))->assertOk()->assertSee('Situs apa pun dengan alamat https:// boleh dipakai.');
+        $this->get(route('qr-link.edit', $link))->assertOk()->assertSee('Situs apa pun dengan alamat https:// boleh dipakai.');
+    }
+
     // ------------------------------------------------------- isi QR
 
     public function test_qr_content_is_the_absolute_short_url(): void

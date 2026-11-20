@@ -5,7 +5,7 @@
     </svg>
     <div class="space-y-1">
         <div class="font-bold text-amber-950">Baca sebelum membuat atau membagikan QR:</div>
-        <p>1. Berkas Drive harus dibagikan sebagai <strong>"Siapa saja yang memiliki link"</strong>. Bila akses dibatasi, pemindai akan melihat pesan "Anda memerlukan akses".</p>
+        <p>1. Tautan tujuan harus bisa dibuka oleh siapa saja yang memindai QR (akses publik). Bila menggunakan Google Drive/Docs, pastikan opsi berbagi disetel ke <strong>"Siapa saja yang memiliki link"</strong>. Bila akses dibatasi, pemindai akan melihat pesan "Anda memerlukan akses" atau halaman login.</p>
         <p>2. <strong>Jangan</strong> dipakai untuk dokumen berisi data pasien atau rekam medis (UU PDP). Siapa pun yang memegang QR dapat membuka tujuannya.</p>
         <p>3. Bila QR bocor atau salah sebar, <strong>nonaktifkan</strong> QR dari halaman detail.</p>
     </div>

@@ -64,11 +64,43 @@ class QrLinkUrlGuard
 
         $allowed = $this->allowedHosts();
 
-        if (! in_array(strtolower($parts['host']), $allowed, true)) {
+        // Whitelist kosong = mode bebas: situs https publik apa pun boleh,
+        // tetapi bukan alamat IP atau nama lokal (localhost, intranet, dst).
+        if ($allowed === [] && ! $this->isPublicHostName(strtolower($parts['host']))) {
+            return 'Tautan harus memakai nama domain situs, bukan alamat IP atau nama lokal.';
+        }
+
+        if ($allowed !== [] && ! in_array(strtolower($parts['host']), $allowed, true)) {
             return 'Domain tujuan belum diizinkan. Domain yang diizinkan: ' . implode(', ', $allowed) . '.';
         }
 
         return null;
+    }
+
+    /**
+     * Nama domain publik: minimal dua label, tiap label huruf/angka/tanda hubung
+     * (tidak diawali atau diakhiri tanda hubung), label terakhir bukan angka murni.
+     * Menolak IPv4/IPv6 literal, "localhost", dan nama satu label seperti "intranet".
+     */
+    private function isPublicHostName(string $host): bool
+    {
+        if ($host === '' || strlen($host) > 253) {
+            return false;
+        }
+
+        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            return false;
+        }
+
+        $label = '[\p{L}\p{N}](?:[\p{L}\p{N}-]*[\p{L}\p{N}])?';
+
+        if (preg_match('/^(?:' . $label . '\.)+' . $label . '$/u', $host) !== 1) {
+            return false;
+        }
+
+        $labels = explode('.', $host);
+
+        return ! ctype_digit((string) end($labels));
     }
 
     public function isAllowed(string $url): bool

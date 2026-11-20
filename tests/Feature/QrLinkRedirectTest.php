@@ -170,6 +170,34 @@ class QrLinkRedirectTest extends TestCase
         $this->assertSame(0, $link->fresh()->scan_count);
     }
 
+    public function test_empty_whitelist_redirects_to_non_google_target(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+        $link = $this->link(['target_url' => 'https://example.org/menu?x=1']);
+
+        $this->get(route('qr-link.go', $link->code))
+            ->assertStatus(302)
+            ->assertHeader('Location', 'https://example.org/menu?x=1');
+
+        $this->assertSame(1, $link->fresh()->scan_count);
+    }
+
+    public function test_empty_whitelist_does_not_follow_ip_or_local_targets_in_database(): void
+    {
+        config(['tte.qr_link_allowed_hosts' => []]);
+        $link = $this->link();
+
+        foreach (['https://127.0.0.1/x', 'https://localhost/x', 'https://intranet/x', 'http://example.org/x'] as $bad) {
+            $link->forceFill(['target_url' => $bad])->save();
+
+            $this->get(route('qr-link.go', $link->code))
+                ->assertStatus(404)
+                ->assertHeaderMissing('Location');
+        }
+
+        $this->assertSame(0, $link->fresh()->scan_count);
+    }
+
     public function test_flag_off_makes_the_public_route_404_and_does_not_count(): void
     {
         $link = $this->link();

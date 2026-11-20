@@ -38,9 +38,14 @@
                             <x-input-label for="target_url" :value="__('Tautan Tujuan')" />
                             <x-text-input id="target_url" name="target_url" type="text" inputmode="url" autocomplete="off"
                                 class="mt-1 block w-full text-sm font-mono" :value="old('target_url')"
-                                placeholder="https://drive.google.com/file/d/..." required autofocus />
+                                placeholder="https://contoh-situs.com/berkas-atau-halaman..." required autofocus />
                             <p class="mt-1 text-xs text-gray-500">
-                                Wajib diawali https://. Domain yang diizinkan: {{ implode(', ', $allowedHosts) }}.
+                                Wajib diawali https://.
+                                @if (count($allowedHosts))
+                                    Domain yang diizinkan: {{ implode(', ', $allowedHosts) }}.
+                                @else
+                                    Situs apa pun dengan alamat https:// boleh dipakai.
+                                @endif
                             </p>
                             <x-input-error class="mt-2" :messages="$errors->get('target_url')" />
                         </div>
