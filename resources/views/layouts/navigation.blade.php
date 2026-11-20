@@ -27,6 +27,11 @@
                             {{ __('Generate QR') }}
                         </x-nav-link>
                     @endif
+                    @if (config('tte.qr_link_enabled'))
+                        <x-nav-link :href="route('qr-link.index')" :active="request()->routeIs('qr-link.*')">
+                            {{ __('QR Link') }}
+                        </x-nav-link>
+                    @endif
                     @if (Auth::user()->role === 'admin')
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin') }}
@@ -109,6 +114,11 @@
             @else
                 <x-responsive-nav-link :href="route('qr.create')" :active="request()->routeIs('qr.create')">
                     {{ __('Generate QR') }}
+                </x-responsive-nav-link>
+            @endif
+            @if (config('tte.qr_link_enabled'))
+                <x-responsive-nav-link :href="route('qr-link.index')" :active="request()->routeIs('qr-link.*')">
+                    {{ __('QR Link') }}
                 </x-responsive-nav-link>
             @endif
             @if (Auth::user()->role === 'admin')

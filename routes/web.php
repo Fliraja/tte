@@ -6,6 +6,8 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\NumberBlockController;
 use App\Http\Controllers\QrDocumentController;
 use App\Http\Controllers\QrGenerationController;
+use App\Http\Controllers\QrLinkController;
+use App\Http\Controllers\QrLinkRedirectController;
 use App\Http\Controllers\SignerController;
 use App\Http\Controllers\TanpaNomorController;
 use App\Http\Controllers\UserManagementController;
@@ -27,6 +29,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/tanpa-nomor', [TanpaNomorController::class, 'create'])->name('tanpa-nomor.create');
     Route::post('/tanpa-nomor', [TanpaNomorController::class, 'store'])->name('tanpa-nomor.store');
+
+    // QR Link (404 selama TTE_QR_LINK_ENABLED=false). 'create' harus sebelum '{link}'.
+    Route::middleware('qr-link.enabled')->prefix('qr-link')->name('qr-link.')->group(function () {
+        Route::get('/', [QrLinkController::class, 'index'])->name('index');
+        Route::get('/create', [QrLinkController::class, 'create'])->name('create');
+        Route::post('/', [QrLinkController::class, 'store'])->name('store');
+        Route::get('/{link}', [QrLinkController::class, 'show'])->name('show');
+        Route::get('/{link}/png', [QrLinkController::class, 'png'])->name('png');
+        Route::get('/{link}/edit', [QrLinkController::class, 'edit'])->name('edit');
+        Route::patch('/{link}', [QrLinkController::class, 'update'])->name('update');
+        Route::patch('/{link}/toggle', [QrLinkController::class, 'toggle'])->name('toggle');
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -50,5 +64,11 @@ Route::get('/verify/{uuid}', [VerificationController::class, 'show'])
 Route::get('/verify/{uuid}/document', [QrDocumentController::class, 'publicStream'])
     ->middleware('throttle:60,1')
     ->name('verify.document');
+
+// QR Link publik: redirect dikerjakan di Fase Q3 (sementara 404).
+Route::get('/l/{code}', [QrLinkRedirectController::class, 'go'])
+    ->where('code', '[a-z2-9]{10}')
+    ->middleware(['qr-link.enabled', 'throttle:60,1'])
+    ->name('qr-link.go');
 
 require __DIR__.'/auth.php';
