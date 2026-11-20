@@ -65,7 +65,7 @@ Route::get('/verify/{uuid}/document', [QrDocumentController::class, 'publicStrea
     ->middleware('throttle:60,1')
     ->name('verify.document');
 
-// QR Link publik: redirect dikerjakan di Fase Q3 (sementara 404).
+// QR Link publik: redirect 302 ke tujuan (tanpa login, 404 bila flag mati).
 Route::get('/l/{code}', [QrLinkRedirectController::class, 'go'])
     ->where('code', '[a-z2-9]{10}')
     ->middleware(['qr-link.enabled', 'throttle:60,1'])

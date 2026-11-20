@@ -403,13 +403,12 @@ class QrLinkControllerTest extends TestCase
             ->assertDontSee(route('qr-link.index'), false);
     }
 
-    // ------------------------------------------------------- rute publik (Q2)
+    // ------------------------------------------------------- isi QR
 
-    public function test_public_route_name_exists_but_is_still_404_until_phase_q3(): void
+    public function test_qr_content_is_the_absolute_short_url(): void
     {
         $link = $this->linkOf($this->staff1);
 
         $this->assertSame(url('/l/' . $link->code), route('qr-link.go', $link->code));
-        $this->get(route('qr-link.go', $link->code))->assertNotFound();
     }
 }
